@@ -86,6 +86,8 @@ void Workspace::parse(std::string file) {
 	name = values[0];
 	targetNo = std::stoi(values[1]); // values[1] is the target number in config file
 	targetList = values[2];
+	if (targetList == "-")
+		return;
 	std::stringstream ss(values[2]); // values[2] is the list of targets in form a,b,c,d
 				 // splitting list of targets into array
 	while(ss.good()){
