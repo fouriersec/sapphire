@@ -23,7 +23,7 @@ void printUsage(){
 	using boost::format;
 	std::cout << "\nUsage: sapphire <workspace>\n\nThis will either load a workspace or create a new one."
 		".\nConsider adding sapphire/ to the PATH."
-		"\nTo delete a workspace, simply delete the configuration file in the workspaces/ directory.\n\n";
+		"\nTo delete a workspace, simply delete its configuration file in the workspaces/ directory.\n\n";
 	std::cout << format("%-40s %-40s %-40s\n") % "Commands" % "Usage" % "Description";
 	std::cout << format("%-40s %-40s %-40s\n") % "info" % "" % "list all targets and their IDs, as well as workspace name";
 	std::cout << format("%-40s %-40s %-40s\n") % "add-target" % "add-target <IP>" % "add a target machine to your workspace (maximum 3)";
