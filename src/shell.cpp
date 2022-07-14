@@ -124,8 +124,10 @@ int set (std::string var, std::string value) {
 	return setenv(var_c,val_c,0);
 }
 
-int handler(std::vector<std::string> cmd) {
+void handler(std::vector<std::string> cmd) {
 	const std::string workspace_cmd[]	= {"add-target","info","load","make-note","notes","!exec","!cd","back","set","!delete","unload","help","clear","visit"};
+	const std::string dangerous[]		= {"exec","cd","delete"};
+	int no_of_dangerous			= sizeof(dangerous)/sizeof(dangerous[0]);
 	std::string subTool			= cmd[0];
 	int no_of_tools			= sizeof(workspace_cmd)/sizeof(workspace_cmd[0]);
 	auto iter			= std::find(workspace_cmd, workspace_cmd + no_of_tools, subTool);
@@ -148,7 +150,7 @@ int handler(std::vector<std::string> cmd) {
 		case 2:
 			if (cmd.size() < 2){
 				std::cout << "please specify target id(s): 'load <id>'\n";
-				return 1;
+				return;
 			}
 			targetID = std::stoi(cmd[1]);
 			target = Ws.load(targetID);
@@ -157,7 +159,7 @@ int handler(std::vector<std::string> cmd) {
 		case 3:
 			if (!passTargetCheck()){
 				std::cout << noSelectionError;
-				return 1;
+				return;
 			}
 			for (std::string word : cmd){
 				if (first) {first = false; continue; }
@@ -169,7 +171,7 @@ int handler(std::vector<std::string> cmd) {
 		case 4:
 			if (!passTargetCheck()){
 				std::cout << noSelectionError;
-				return 1;
+				return;
 			}
 
 			std::cout << "\n" << target.getNotes();
@@ -177,23 +179,23 @@ int handler(std::vector<std::string> cmd) {
 		case 5:
 			for (std::string token : cmd){
 				if (first) { first = false; continue; }
-				if (token == "cd") {std::cout << "cd can be used without the exec function.\n"; return 1;}
+				if (token == "cd") {std::cout << "cd can be used without the exec function.\n"; return;}
 				system_cmd += token + ' ';	
 			}
 
 			system(system_cmd.c_str());
 			break;
 		case 6:
-			if (cmd.size() != 2){std::cout << incorrectUsage(cmd[0]);return 1;}
+			if (cmd.size() != 2){std::cout << incorrectUsage(cmd[0]);return;}
 			chdir(cmd[1]);
 			std::cout << RED << "\nWarning: You have left your workspace - use 'back' to return\n\n" << RESET;
 			break;
 		case 7:
-			if (cmd.size() != 1){std::cout << incorrectUsage(cmd[0]);return 1;}
+			if (cmd.size() != 1){std::cout << incorrectUsage(cmd[0]);return;}
 			chdir(WORK_AREA);
 			break;
 		case 8:	
-			if (cmd.size() > 3 || cmd.size() < 2){std::cout << incorrectUsage(cmd[0]); return 1;}
+			if (cmd.size() > 3 || cmd.size() < 2){std::cout << incorrectUsage(cmd[0]); return;}
 			else if (!passTargetCheck()) 
 				std::cout << noSelectionError;
 			else if (cmd.size() == 2 && cmd[1] == "current"){
@@ -210,7 +212,7 @@ int handler(std::vector<std::string> cmd) {
 			}
 			break;
 		case 9:
-			if (cmd.size() != 2) {std::cout << incorrectUsage(cmd[0]);return 1;}
+			if (cmd.size() != 2) {std::cout << incorrectUsage(cmd[0]);return;}
 			std::cout << YELLOW << "are you sure you want to delete target " << cmd[1] << "? [y/n] " << RESET;
 			std::cin >> confirm;
 			if (confirm == "y"){
@@ -221,21 +223,21 @@ int handler(std::vector<std::string> cmd) {
 			std::cin.ignore();
 			break;
 		case 10:
-			if (cmd.size() != 1) {std::cout << incorrectUsage(cmd[0]);return 1;}
-			if (targetID == 999){std::cout << "no targets to unload\n";return 1;}
+			if (cmd.size() != 1) {std::cout << incorrectUsage(cmd[0]);return;}
+			if (targetID == 999){std::cout << "no targets to unload\n";return;}
 			target = Target();
 			std::cout << "unloaded target " << targetID << "\n";
 			break;
 		case 11:
-			if (cmd.size() != 1) {std::cout << incorrectUsage(cmd[0]);return 1;}
+			if (cmd.size() != 1) {std::cout << incorrectUsage(cmd[0]);return;}
 			printUsage();
 			break;
 		case 12:
-			if (cmd.size() != 1) {std::cout << incorrectUsage(cmd[0]);return 1;}
+			if (cmd.size() != 1) {std::cout << incorrectUsage(cmd[0]);return;}
 			system("clear");
 			break;
 		case 13:
-			if (cmd.size() != 2) {std::cout << incorrectUsage(cmd[0]);return 1;}
+			if (cmd.size() != 2) {std::cout << incorrectUsage(cmd[0]);return;}
 			else if (!passTargetCheck())
 				std::cout << noSelectionError;
 			else
@@ -243,9 +245,15 @@ int handler(std::vector<std::string> cmd) {
 			system(site_str.c_str());
 			break;
 		default:
+			for (int i = 0; i < no_of_dangerous; i++){
+				if (cmd[0] == dangerous[i]){
+					std::cout << "sapphire: this is 'dangerous' command - try prefixing with '!'\n";
+					return;
+				}
+			}
 			std::cout << "sapphire: " << subTool << ": command not found\n";
 	}	
-	return 0;
+	return;
 }
 
 
@@ -266,7 +274,7 @@ int main(int argc, char *argv[]) {
 		cmd = regex_replace(cmd, regex("^ +| +$|( ) +"), "$1"); //remove trailing, leading and extra whitespaces
 		if (cmd == "exit"){
 			cout << "\nGoodbye";
-			return 0;
+			break;
 		}
 		std::vector<std::string> tokens	= get_tokens(cmd);
 		handler(tokens);
