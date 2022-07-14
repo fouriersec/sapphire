@@ -5,8 +5,7 @@ if [ $# -eq 0 ]; then
 	echo "Consider adding this directory to the PATH."
 	exit 1
 fi
-mkdir notes
-mkdir workspaces
-g++ workspace.cpp parser.cpp shell.cpp -std=c++17 -o sapphire
+mkdir data
+g++ src/workspace.cpp src/parser.cpp src/shell.cpp -std=c++17 -o sapphire
 echo "Installation complete"
 

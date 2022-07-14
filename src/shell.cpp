@@ -23,22 +23,25 @@ void printUsage(){
 	using boost::format;
 	std::cout << "\nUsage: sapphire <workspace>\n\nThis will either load a workspace or create a new one."
 		".\nConsider adding sapphire/ to the PATH."
-		"\nTo delete a workspace, simply delete its configuration file in the workspaces/ directory.\n\n";
+		"\nTo delete a workspace, simply delete its folder from the data/ directory.\n\n";
 	std::cout << format("%-40s %-40s %-40s\n") % "Commands" % "Usage" % "Description";
 	std::cout << format("%-40s %-40s %-40s\n") % "info" % "" % "list all targets and their IDs, as well as workspace name";
 	std::cout << format("%-40s %-40s %-40s\n") % "add-target" % "add-target <IP>" % "add a target machine to your workspace (maximum 3)";
 	std::cout << format("%-40s %-40s %-40s\n") % "load" % "load <target-id>" % "load a target to work with";
 	std::cout << format("%-40s %-40s %-40s\n") % "notes" % "" % "display all notes made for the loaded target";
 	std::cout << format("%-40s %-40s %-40s\n") % "make-note" % "make-note <note>" % "add a note for the loaded target to its note file.";
-	std::cout << format("%-40s %-40s %-40s\n") % "exec" % "exec <cmd>" % "execute standard shell commands";
 	std::cout << format("%-40s %-40s %-40s\n") % "back" % "" % "return to the workspace directory (see !cd)";
 	std::cout << format("%-40s %-40s %-40s\n") % "set" % "set <ENV_VAR> <value>" % "set environment variables for use when using exec";
 	std::cout << "\nNote: You may use 'set current' to set the environment variable RHOST to the IP of the currently loaded target\n\n";
-	std::cout << format("%-40s %-40s %-40s\n") % "help" % "" % "display this help message";
+	std::cout << format("%-40s %-40s %-40s\n") % "clear" % "" % "clear the terminal";
 	std::cout << format("%-40s %-40s %-40s\n") % "unload" % "" % "unload the current target";
+	std::cout << format("%-40s %-40s %-40s\n") % "visit" % "visit <protocol> <port>" % "visit the webpage of the loaded target";
+	std::cout << format("%-40s %-40s %-40s\n") % "help" % "" % "display this help message";
 	std::cout << "\nDangerous commands - these must be prefixed with a '!' to be run\n\n";
 	std::cout << format("%-40s %-40s %-40s\n") % "cd" % "cd <dir>" % "change current working directory - MAY CAUSE ERRORS, USE CAUTIOUSLY";
-	std::cout << format("%-40s %-40s %-40s\n") % "delete" % "delete <target-id>" % "delete a target and everything associated from workspace\n";
+	std::cout << format("%-40s %-40s %-40s\n") % "exec" % "exec <cmd>" % "execute standard shell commands - you may wish to spawn a shell instead";
+	std::cout << format("%-40s %-40s %-40s\n") % "" % "" % "and then 'exit' after use";
+	std::cout << format("%-40s %-40s %-40s\n") % "delete" % "delete <target-id>" % "delete a target and everything associated with it from workspace\n";
 }
 
 std::vector<std::string> get_tokens(std::string cmd) {
@@ -77,7 +80,17 @@ std::string incorrectUsage(std::string cmd){
 }
 
 Workspace init_workspace(std::string name) {
-	std::string configFile = "workspaces/" + name + ".conf";
+	std::string data_dir 	= "data/" + name;
+	std::string note_dir	= "notes";
+	std::string configFile 	= name + ".conf";
+	if (!std::filesystem::exists(data_dir))
+		std::filesystem::create_directory(data_dir);
+
+	std::filesystem::current_path(data_dir);
+
+	if (!std::filesystem::exists(note_dir))
+		std::filesystem::create_directory(note_dir); 
+
 	if (std::filesystem::exists(configFile)) {
 		std::cout << "Loading " << name << ".conf ...\n";
 		Ws.parse(configFile); //Parse configfile and update class values with it.
@@ -87,7 +100,7 @@ Workspace init_workspace(std::string name) {
 		Ws.setName(name);
 		std::cout << "Workspace " << Ws.getName() << " has been initialised.\n";
 	}
-
+	WORK_AREA = std::filesystem::current_path();
 	info();
 	return Ws;
 }
@@ -112,7 +125,7 @@ int set (std::string var, std::string value) {
 }
 
 int handler(std::vector<std::string> cmd) {
-	const std::string workspace_cmd[]	= {"add-target","info","load","make-note","notes","exec","!cd","back","set","!delete","unload","help","clear"};
+	const std::string workspace_cmd[]	= {"add-target","info","load","make-note","notes","!exec","!cd","back","set","!delete","unload","help","clear","visit"};
 	std::string subTool			= cmd[0];
 	int no_of_tools			= sizeof(workspace_cmd)/sizeof(workspace_cmd[0]);
 	auto iter			= std::find(workspace_cmd, workspace_cmd + no_of_tools, subTool);
@@ -120,6 +133,7 @@ int handler(std::vector<std::string> cmd) {
 	bool first = true;
 	int returnVal{};
 	std::string confirm;
+	std::string site_str = "xdg-open ";
 
 	switch(std::distance(workspace_cmd, iter)){ //takes the index of the builtin function as a parameter
 		case 0:
@@ -141,7 +155,7 @@ int handler(std::vector<std::string> cmd) {
 			std::cout << "Successfully loaded target " << cmd[1] << "\n";
 			break;
 		case 3:
-			if (!passTargetCheck){
+			if (!passTargetCheck()){
 				std::cout << noSelectionError;
 				return 1;
 			}
@@ -220,6 +234,14 @@ int handler(std::vector<std::string> cmd) {
 			if (cmd.size() != 1) {std::cout << incorrectUsage(cmd[0]);return 1;}
 			system("clear");
 			break;
+		case 13:
+			if (cmd.size() != 2) {std::cout << incorrectUsage(cmd[0]);return 1;}
+			else if (!passTargetCheck())
+				std::cout << noSelectionError;
+			else
+				site_str += cmd[1] + "://" + target.getIP() + ":" + cmd[2];
+			system(site_str.c_str());
+			break;
 		default:
 			std::cout << "sapphire: " << subTool << ": command not found\n";
 	}	
@@ -237,7 +259,6 @@ int main(int argc, char *argv[]) {
 		return 1;
 	}
 	Workspace Ws = init_workspace(argv[1]);
-	WORK_AREA = std::filesystem::current_path();
 
 	while (1){
 		cout << "(" << RED << username << "@sapphire" << RESET << ")~$ ";
