@@ -8,6 +8,8 @@
 #include <filesystem>
 #include <sstream>
 #include <cstdlib>
+#include <unistd.h>
+#include <limits.h>
 #define RESET   "\033[0m"
 #define RED     "\033[1;31m"
 #define YELLOW  "\033[1;33m"
@@ -256,16 +258,30 @@ void handler(std::vector<std::string> cmd) {
 	return;
 }
 
-
+std::string get_selfpath() {
+        char buff[1024];
+        ssize_t len = ::readlink("/proc/self/exe", buff, sizeof(buff)-1);
+        if (len != -1) {
+                buff[len] = '\0';
+                return std::string(buff);
+    }
+        else {
+                return "Cannot get binary path";
+    }  
+}
 
 int main(int argc, char *argv[]) {
 	using namespace std;
+	std::string selfpath = get_selfpath();
+	selfpath.erase(selfpath.length()-8);
+	std::cout << selfpath << "\n";
 	string username = getenv("USER");
 	string cmd;
 	if (argc != 2){
 		printUsage();
 		return 1;
 	}
+	filesystem::current_path(selfpath);
 	Workspace Ws = init_workspace(argv[1]);
 
 	while (1){
