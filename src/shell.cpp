@@ -144,6 +144,7 @@ void handler(std::vector<std::string> cmd) {
 			for (auto i : cmd) {
 				if (first) {first=false; continue; }
 				Ws.addTarget(i);
+				counter += 1;
 			}		
 			break;
 		case 1:
@@ -223,6 +224,10 @@ void handler(std::vector<std::string> cmd) {
 			std::cin >> confirm;
 			if (confirm == "y"){
 				Ws.deleteTarget(std::stoi(cmd[1]));
+				if (targetID == std::stoi(cmd[1])){
+					targetID = 999;
+					target = Target();
+				}	
 				std::cout << "target " << cmd[1] << " successfully deleted\n";
 			}
 			std::cin.clear();
@@ -231,6 +236,7 @@ void handler(std::vector<std::string> cmd) {
 		case 10:
 			if (cmd.size() != 1) {std::cout << incorrectUsage(cmd[0]);return;}
 			if (targetID == 999){std::cout << "no targets to unload\n";return;}
+			targetID = 999;
 			target = Target();
 			std::cout << "unloaded target " << targetID << "\n";
 			break;

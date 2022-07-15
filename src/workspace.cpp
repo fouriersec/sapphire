@@ -17,7 +17,7 @@ Target::Target() {
 std::string Target::getNotes(){
 	bool notesExist = std::filesystem::exists(noteFile);
 	if (!notesExist)
-		return "No notes have been made for this target\n";
+		return "No notes have been made for this target\n\n";
 	notes = "";
 	std::ifstream input(noteFile);
 	for( std::string line; getline( input, line ); ){
