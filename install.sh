@@ -8,7 +8,8 @@ fi
 
 if [ -d "./data" ] 
 then
-    echo "Directory data exists." 
+    echo "Directory data exists."
+    exit 1 
 else
 
     mkdir data
