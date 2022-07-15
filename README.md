@@ -2,7 +2,7 @@
 ## A CTF workspace organisation tool  
 
 ### Why?
-I first made a (very) simple prototype of Sapphire in python to allow me to automatically set up my work area each time I played some [HackTheBox](hackthebox.com).  
+I first made a (very) simple prototype of Sapphire in python to allow me to automatically set up my work area each time I played some [HackTheBox](https://hackthebox.com).  
 The idea grew, and eventually I decided to create a full-fledged version of the tool in C++17, due to the speed benefits that come with it. There is still room for improvement in terms of the source code, but I hope you find Sapphire useful.  
 
 ### Features
