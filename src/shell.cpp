@@ -239,7 +239,7 @@ void handler(std::vector<std::string> cmd) {
 			system("clear");
 			break;
 		case 13:
-			if (cmd.size() != 2) {std::cout << incorrectUsage(cmd[0]);return;}
+			if (cmd.size() != 3) {std::cout << incorrectUsage(cmd[0]);return;}
 			else if (!passTargetCheck())
 				std::cout << noSelectionError;
 			else
