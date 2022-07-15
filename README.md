@@ -16,6 +16,8 @@ The idea grew, and eventually I decided to create a full-fledged version of the 
 ### Usage
 Sapphire is pretty simple to install, just run `./install.sh`. To view the usage, run `./sapphire`. You can always view the usage by running 'help' within the software.
 
+### Dependencies
+Boost - for now, it is necessary to install boost prior to installing the tool. You can install it on Ubuntu/Debian with `sudo apt-get install libboost-all-dev`.  
+
+
 Built and tested on Kali Linux.
-
-
