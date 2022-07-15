@@ -274,7 +274,6 @@ int main(int argc, char *argv[]) {
 	using namespace std;
 	std::string selfpath = get_selfpath();
 	selfpath.erase(selfpath.length()-8);
-	std::cout << selfpath << "\n";
 	string username = getenv("USER");
 	string cmd;
 	if (argc != 2){
