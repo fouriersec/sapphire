@@ -156,7 +156,7 @@ void handler(std::vector<std::string> cmd) {
 				return;
 			}
 			try {
-				if (std::stoi(cmd[1]) > counter){std::cout << "target " << cmd[1] << " does not exist\n";return;}
+				if (std::stoi(cmd[1]) > counter - 1){std::cout << "target " << cmd[1] << " does not exist\n";return;}
 			}
 			catch (...){std::cout << "please enter a valid target id\n";return;}
 			targetID = std::stoi(cmd[1]);
