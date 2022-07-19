@@ -40,6 +40,7 @@ void printUsage(){
 	std::cout << format("%-40s %-40s %-40s\n") % "visit" % "visit <protocol> <port>" % "visit the webpage of the loaded target";
 	std::cout << format("%-40s %-40s %-40s\n") % "help" % "" % "display this help message";
 	std::cout << "\nDangerous commands - these must be prefixed with a '!' to be run\n\n";
+	std::cout << format("%-40s %-40s %-40s\n") % "s" % "" % "spawn a bash shell";
 	std::cout << format("%-40s %-40s %-40s\n") % "cd" % "cd <dir>" % "change current working directory - MAY CAUSE ERRORS, USE CAUTIOUSLY";
 	std::cout << format("%-40s %-40s %-40s\n") % "exec" % "exec <cmd>" % "execute standard shell commands - you may wish to spawn a shell instead";
 	std::cout << format("%-40s %-40s %-40s\n") % "" % "" % "and then 'exit' after use";
@@ -127,8 +128,8 @@ int set (std::string var, std::string value) {
 }
 
 void handler(std::vector<std::string> cmd) {
-	const std::string workspace_cmd[]	= {"add-target","info","load","make-note","notes","!exec","!cd","back","set","!delete","unload","help","clear","visit"};
-	const std::string dangerous[]		= {"exec","cd","delete"};
+	const std::string workspace_cmd[]	= {"add-target","info","load","make-note","notes","!exec","!cd","back","set","!delete","unload","help","clear","visit","!s"};
+	const std::string dangerous[]		= {"exec","cd","delete","s"};
 	int no_of_dangerous			= sizeof(dangerous)/sizeof(dangerous[0]);
 	std::string subTool			= cmd[0];
 	int no_of_tools			= sizeof(workspace_cmd)/sizeof(workspace_cmd[0]);
@@ -236,9 +237,9 @@ void handler(std::vector<std::string> cmd) {
 		case 10:
 			if (cmd.size() != 1) {std::cout << incorrectUsage(cmd[0]);return;}
 			if (targetID == 999){std::cout << "no targets to unload\n";return;}
-			targetID = 999;
 			target = Target();
 			std::cout << "unloaded target " << targetID << "\n";
+			targetID = 999;
 			break;
 		case 11:
 			if (cmd.size() != 1) {std::cout << incorrectUsage(cmd[0]);return;}
@@ -256,6 +257,11 @@ void handler(std::vector<std::string> cmd) {
 				site_str += cmd[1] + "://" + target.getIP() + ":" + cmd[2];
 			system(site_str.c_str());
 			break;
+		case 14:
+			if (cmd.size() != 1) {std::cout << incorrectUsage(cmd[0]);return;}
+			system("/bin/bash");
+			break;
+
 		default:
 			for (int i = 0; i < no_of_dangerous; i++){
 				if (cmd[0] == dangerous[i]){
