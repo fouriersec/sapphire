@@ -9,6 +9,9 @@
 #include <cstdlib>
 #include <unistd.h>
 #include <limits.h>
+#include "readline/readline.h"
+#include "readline/history.h"
+
 #define RESET   "\033[0m"
 #define RED     "\033[1;31m"
 #define YELLOW  "\033[1;33m"
@@ -276,6 +279,10 @@ void handler(std::vector<std::string> cmd) {
 					return;
 				}
 			}
+			if (cmd[0] == "" && cmd.size() == 1){
+				std::cout << "\n";
+				return;
+			}
 			std::cout << "sapphire: " << subTool << ": command not found\n";
 	}	
 	return;
@@ -293,25 +300,26 @@ std::string get_selfpath() {
     }  
 }
 
-int main(int argc, char *argv[]) {
+int main(int argc, char *argv[]) {	
 	using namespace std;
 	std::string selfpath = get_selfpath();
 	selfpath.erase(selfpath.length()-8);
 	string username = getenv("USER");
-	string cmd;
+	string prompt = std::string("(") + RED + username + "@sapphire" + RESET + ")~$ ";
 	if (argc != 2){
 		printUsage();
 		return 1;
 	}
 	filesystem::current_path(selfpath);
 	Workspace Ws = init_workspace(argv[1]);
-
-	while (1){
-		cout << "(" << RED << username << "@sapphire" << RESET << ")~$ ";
-		getline(cin, cmd);
+	char* line;
+	while ((line = readline(prompt.c_str())) != nullptr){
+		if (*line) add_history(line);
+		string cmd{line};
+		free(line);
 		cmd = regex_replace(cmd, regex("^ +| +$|( ) +"), "$1"); //remove trailing, leading and extra whitespaces
 		if (cmd == "exit"){
-			cout << "\nGoodbye";
+			cout << "\nGoodbye\n\n";
 			break;
 		}
 		std::vector<std::string> tokens	= get_tokens(cmd);
