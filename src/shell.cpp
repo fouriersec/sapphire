@@ -2,7 +2,6 @@
 #include <algorithm>
 #include <iostream>
 #include "builtins.h"
-#include "boost/format.hpp"
 #include <regex>
 #include <sys/stat.h>
 #include <filesystem>
@@ -21,30 +20,39 @@ int counter{};
 std::string noSelectionError = "Target has not been selected. run 'info' for target list, then select a target with 'load <id>'\n";
 std::string WORK_AREA;
 
-void printUsage(){
-	using boost::format;
-	std::cout << "\nUsage: sapphire <workspace>\n\nThis will either load a workspace or create a new one."
-		".\nConsider adding sapphire/ to the PATH."
-		"\nTo delete a workspace, simply delete its folder from the data/ directory.\n\n";
-	std::cout << format("%-40s %-40s %-40s\n") % "Commands" % "Usage" % "Description";
-	std::cout << format("%-40s %-40s %-40s\n") % "info" % "" % "list all targets and their IDs, as well as workspace name";
-	std::cout << format("%-40s %-40s %-40s\n") % "add-target" % "add-target <IP>" % "add a target machine to your workspace (maximum 3)";
-	std::cout << format("%-40s %-40s %-40s\n") % "load" % "load <target-id>" % "load a target to work with";
-	std::cout << format("%-40s %-40s %-40s\n") % "notes" % "" % "display all notes made for the loaded target";
-	std::cout << format("%-40s %-40s %-40s\n") % "make-note" % "make-note <note>" % "add a note for the loaded target to its note file.";
-	std::cout << format("%-40s %-40s %-40s\n") % "back" % "" % "return to the workspace directory (see !cd)";
-	std::cout << format("%-40s %-40s %-40s\n") % "set" % "set <ENV_VAR> <value>" % "set environment variables for use when using exec";
-	std::cout << "\nNote: You may use 'set current' to set the environment variable RHOST to the IP of the currently loaded target\n\n";
-	std::cout << format("%-40s %-40s %-40s\n") % "clear" % "" % "clear the terminal";
-	std::cout << format("%-40s %-40s %-40s\n") % "unload" % "" % "unload the current target";
-	std::cout << format("%-40s %-40s %-40s\n") % "visit" % "visit <protocol> <port>" % "visit the webpage of the loaded target";
-	std::cout << format("%-40s %-40s %-40s\n") % "help" % "" % "display this help message";
-	std::cout << "\nDangerous commands - these must be prefixed with a '!' to be run\n\n";
-	std::cout << format("%-40s %-40s %-40s\n") % "s" % "" % "spawn a bash shell";
-	std::cout << format("%-40s %-40s %-40s\n") % "cd" % "cd <dir>" % "change current working directory - MAY CAUSE ERRORS, USE CAUTIOUSLY";
-	std::cout << format("%-40s %-40s %-40s\n") % "exec" % "exec <cmd>" % "execute standard shell commands - you may wish to spawn a shell instead";
-	std::cout << format("%-40s %-40s %-40s\n") % "" % "" % "and then 'exit' after use";
-	std::cout << format("%-40s %-40s %-40s\n") % "delete" % "delete <target-id>" % "delete a target and everything associated with it from workspace\n";
+void printUsage() {
+	const char *usage = R""""(
+Usage: sapphire <workspace-name>
+
+This will either load a workspace or create a new one.
+Consider adding sapphire to the PATH.
+To delete a workspace, simply delete its folder from the data/ directory.
+
+Commands                                 Usage                                    Description                             
+info                                                                              list all targets and their IDs, as well as workspace name
+add-target                               add-target <IP>                          add a target machine to your workspace (maximum 3)
+load                                     load <target-id>                         load a target to work with              
+notes                                                                             display all notes made for the loaded target
+make-note                                make-note <note>                         add a note for the loaded target to its note file.
+back                                                                              return to the workspace directory (see !cd)
+set                                      set <ENV_VAR> <value>                    set environment variables for use when using exec
+
+Note: You may use 'set current' to set the environment variable RHOST to the IP of the currently loaded target
+
+clear                                                                             clear the terminal                      
+unload                                                                            unload the current target               
+visit                                    visit <protocol> <port>                  visit the webpage of the loaded target  
+help                                                                              display this help message               
+
+Dangerous commands - these must be prefixed with a '!' to be run
+
+s                                                                                 spawn a bash shell                      
+cd                                       cd <dir>                                 change current working directory - MAY CAUSE ERRORS, USE CAUTIOUSLY
+exec                                     exec <cmd>                               execute standard shell commands - you may wish to spawn a shell instead
+                                                                                  and then 'exit' after use               
+delete                                   delete <target-id>                       delete a target and everything associated with it from workspace
+)"""";
+	std::cout << usage << "\n";
 }
 
 std::vector<std::string> get_tokens(std::string cmd) {
@@ -64,17 +72,16 @@ std::vector<std::string> get_tokens(std::string cmd) {
 }
 
 void info() {
-	using boost::format;
 	std::cout << "\n";
-	std::cout << format("%-20s %-20s\n") % "Workspace Name:" % Ws.getName();
-	std::cout << format("%-20s %-20s\n") % "Number of Targets:" % Ws.getTargetNo();
+	std::cout <<  "Workspace Name:		" << Ws.getName();
+	std::cout <<  "\nNumber of Targets:	" << Ws.getTargetNo() << "\n\n";
 	counter = 0;
 	for (Target i : Ws.getTargets()) {
-		std::string targetName = "target " + std::to_string(counter) + ":";
-		std::cout << format("%-20s %-20s\n") % targetName % i.getIP();
+		std::string targetName = "target " + std::to_string(counter) + ":   ";
+		std::cout << targetName << RED << i.getIP() << RESET;
 		counter += 1;
 	}
-	std::cout << "\n";
+	std::cout << "\n\n";
 }
 
 std::string incorrectUsage(std::string cmd){

@@ -56,7 +56,7 @@ void Target::setIP(std::string IPaddr){
 	
 
 Workspace::Workspace() {
-	MAX_TARGETS=3;
+	MAX_TARGETS=10;
 	targetList = "-";
 }
 
