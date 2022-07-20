@@ -61,7 +61,7 @@ Workspace::Workspace() {
 }
 
 void Workspace::updateConf() {
-	std::ofstream configFile("/tmp/"+name+".conf");
+	std::ofstream configFile(name+".conf.tmp");
 	configFile << "name="+name+'\n';
 	configFile << "target_number=" << targetNo << "\n";
 	configFile << "targets=" << targetList;
@@ -70,7 +70,7 @@ void Workspace::updateConf() {
 		std::string path = name + ".conf";
 		const char *p = path.c_str();
 		std::remove(p);
-		std::filesystem::rename("/tmp/"+name+".conf",path);	//Replaces config file in workspace dir
+		std::filesystem::rename(name+".conf.tmp",path);	//Replaces config file in workspace dir
 	}
 	catch (std::filesystem::filesystem_error& e) {
 		std::cout << e.what();
