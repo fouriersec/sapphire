@@ -138,8 +138,8 @@ int set (std::string var, std::string value) {
 }
 
 void handler(std::vector<std::string> cmd) {
-	const std::string workspace_cmd[]	= {"add-target","info","load","make-note","notes","!exec","!cd","back","set","!delete","unload","help","clear","visit","!s"};
-	const std::string dangerous[]		= {"exec","cd","delete","s"};
+	const std::string workspace_cmd[]	= {"add-target","info","load","make-note","notes","!cd","back","set","!delete","unload","help","clear","visit","!s"};
+	const std::string dangerous[]		= {"cd","delete","s"};
 	int no_of_dangerous			= sizeof(dangerous)/sizeof(dangerous[0]);
 	std::string subTool			= cmd[0];
 	int no_of_tools			= sizeof(workspace_cmd)/sizeof(workspace_cmd[0]);
@@ -196,24 +196,15 @@ void handler(std::vector<std::string> cmd) {
 			std::cout << "\n" << target.getNotes();
 			break;
 		case 5:
-			for (std::string token : cmd){
-				if (first) { first = false; continue; }
-				if (token == "cd") {std::cout << "cd can be used without the exec function.\n"; return;}
-				system_cmd += token + ' ';	
-			}
-
-			system(system_cmd.c_str());
-			break;
-		case 6:
 			if (cmd.size() != 2){std::cout << incorrectUsage(cmd[0]);return;}
 			chdir(cmd[1]);
 			std::cout << RED << "\nWarning: You have left your workspace - use 'back' to return\n\n" << RESET;
 			break;
-		case 7:
+		case 6:
 			if (cmd.size() != 1){std::cout << incorrectUsage(cmd[0]);return;}
 			chdir(WORK_AREA);
 			break;
-		case 8:	
+		case 7:	
 			if (cmd.size() > 3 || cmd.size() < 2){std::cout << incorrectUsage(cmd[0]); return;}
 			else if (!passTargetCheck()) 
 				std::cout << noSelectionError;
@@ -230,7 +221,7 @@ void handler(std::vector<std::string> cmd) {
 				
 			}
 			break;
-		case 9:
+		case 8:
 			if (cmd.size() != 2) {std::cout << incorrectUsage(cmd[0]);return;}
 			std::cout << YELLOW << "are you sure you want to delete target " << cmd[1] << "? [y/n] " << RESET;
 			std::cin >> confirm;
@@ -245,22 +236,22 @@ void handler(std::vector<std::string> cmd) {
 			std::cin.clear();
 			std::cin.ignore();
 			break;
-		case 10:
+		case 9:
 			if (cmd.size() != 1) {std::cout << incorrectUsage(cmd[0]);return;}
 			if (targetID == 999){std::cout << "no targets to unload\n";return;}
 			target = Target();
 			std::cout << "unloaded target " << targetID << "\n";
 			targetID = 999;
 			break;
-		case 11:
+		case 10:
 			if (cmd.size() != 1) {std::cout << incorrectUsage(cmd[0]);return;}
 			printUsage();
 			break;
-		case 12:
+		case 11:
 			if (cmd.size() != 1) {std::cout << incorrectUsage(cmd[0]);return;}
 			system("clear");
 			break;
-		case 13:
+		case 12:
 			if (cmd.size() != 3) {std::cout << incorrectUsage(cmd[0]);return;}
 			else if (!passTargetCheck())
 				std::cout << noSelectionError;
@@ -268,7 +259,7 @@ void handler(std::vector<std::string> cmd) {
 				site_str += cmd[1] + "://" + target.getIP() + ":" + cmd[2];
 				system(site_str.c_str());
 			break;
-		case 14:
+		case 13:
 			if (cmd.size() != 1) {std::cout << incorrectUsage(cmd[0]);return;}
 			system("/bin/bash");
 			break;
@@ -284,7 +275,14 @@ void handler(std::vector<std::string> cmd) {
 				std::cout << "\n";
 				return;
 			}
-			std::cout << "sapphire: " << subTool << ": command not found\n";
+			for (std::string token : cmd){
+				if (first) { first = false; continue; }
+				if (token == "cd") {std::cout << "cd can only be used by spawning a shell. Try '!s'\n"; return;}
+				system_cmd += token + ' ';	
+			}
+
+			system(system_cmd.c_str());
+			break;
 	}	
 	return;
 }
