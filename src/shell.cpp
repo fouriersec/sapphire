@@ -30,8 +30,9 @@ Usage: sapphire <workspace-name>
 This will either load a workspace or create a new one.
 Consider adding sapphire to the PATH.
 To delete a workspace, simply delete its folder from the data/ directory.
+To execute system commands, simply type them and enter. You may wish to spawn a shell for full interactivity.
 
-Commands                                 Usage                                    Description                             
+Custom commands                          Usage                                    Description                             
 info                                                                              list all targets and their IDs, as well as workspace name
 add-target                               add-target <IP>                          add a target machine to your workspace (maximum 3)
 load                                     load <target-id>                         load a target to work with              
@@ -42,16 +43,13 @@ set                                      set <ENV_VAR> <value>                  
 
 Note: You may use 'set current' to set the environment variable RHOST to the IP of the currently loaded target
 
-clear                                                                             clear the terminal                      
 unload                                                                            unload the current target               
 visit                                    visit <protocol> <port>                  visit the webpage of the loaded target  
 help                                                                              display this help message               
 
 Dangerous commands - these must be prefixed with a '!' to be run
 
-s                                                                                 spawn a bash shell                      
 cd                                       cd <dir>                                 change current working directory - MAY CAUSE ERRORS, USE CAUTIOUSLY
-exec                                     exec <cmd>                               execute standard shell commands - you may wish to spawn a shell instead
                                                                                   and then 'exit' after use               
 delete                                   delete <target-id>                       delete a target and everything associated with it from workspace
 )"""";
@@ -138,8 +136,8 @@ int set (std::string var, std::string value) {
 }
 
 void handler(std::vector<std::string> cmd) {
-	const std::string workspace_cmd[]	= {"add-target","info","load","make-note","notes","!cd","back","set","!delete","unload","help","clear","visit","!s"};
-	const std::string dangerous[]		= {"cd","delete","s"};
+	const std::string workspace_cmd[]	= {"add-target","info","load","make-note","notes","!cd","back","set","!delete","unload","help","visit"};
+	const std::string dangerous[]		= {"cd","delete"};
 	int no_of_dangerous			= sizeof(dangerous)/sizeof(dangerous[0]);
 	std::string subTool			= cmd[0];
 	int no_of_tools			= sizeof(workspace_cmd)/sizeof(workspace_cmd[0]);
@@ -198,6 +196,8 @@ void handler(std::vector<std::string> cmd) {
 		case 5:
 			if (cmd.size() != 2){std::cout << incorrectUsage(cmd[0]);return;}
 			chdir(cmd[1]);
+			if (std::filesystem::current_path() == WORK_AREA)
+				return;
 			std::cout << RED << "\nWarning: You have left your workspace - use 'back' to return\n\n" << RESET;
 			break;
 		case 6:
@@ -248,10 +248,6 @@ void handler(std::vector<std::string> cmd) {
 			printUsage();
 			break;
 		case 11:
-			if (cmd.size() != 1) {std::cout << incorrectUsage(cmd[0]);return;}
-			system("clear");
-			break;
-		case 12:
 			if (cmd.size() != 3) {std::cout << incorrectUsage(cmd[0]);return;}
 			else if (!passTargetCheck())
 				std::cout << noSelectionError;
@@ -259,11 +255,6 @@ void handler(std::vector<std::string> cmd) {
 				site_str += cmd[1] + "://" + target.getIP() + ":" + cmd[2];
 				system(site_str.c_str());
 			break;
-		case 13:
-			if (cmd.size() != 1) {std::cout << incorrectUsage(cmd[0]);return;}
-			system("/bin/bash");
-			break;
-
 		default:
 			for (int i = 0; i < no_of_dangerous; i++){
 				if (cmd[0] == dangerous[i]){
@@ -276,11 +267,9 @@ void handler(std::vector<std::string> cmd) {
 				return;
 			}
 			for (std::string token : cmd){
-				if (first) { first = false; continue; }
-				if (token == "cd") {std::cout << "cd can only be used by spawning a shell. Try '!s'\n"; return;}
+				if (token == "cd") {std::cout << "cd should only be used by spawning a shell. Try '!cd` (unsafe) or preferably, 'bash'/'sh'/'zsh', etc\n"; return;}
 				system_cmd += token + ' ';	
 			}
-
 			system(system_cmd.c_str());
 			break;
 	}	
@@ -301,7 +290,7 @@ std::string get_selfpath() {
 
 int main(int argc, char *argv[]) {	
 	using namespace std;
-	std::string selfpath = get_selfpath();
+	string selfpath = get_selfpath();
 	selfpath.erase(selfpath.length()-8);
 	string username = getenv("USER");
 	string prompt = std::string("(") + RED + username + "@sapphire" + RESET + ")~$ ";
