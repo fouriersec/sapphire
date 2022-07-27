@@ -170,6 +170,7 @@ void handler(std::vector<std::string> cmd) {
 				if (std::stoi(cmd[1]) > counter - 1){std::cout << "target " << cmd[1] << " does not exist\n";return;}
 			}
 			catch (...){std::cout << "please enter a valid target id\n";return;}
+			if (cmd[1] < 0){std::cout << "please enter a valid target id\n";return;}
 			targetID = std::stoi(cmd[1]);
 			target = Ws.load(targetID);
 			std::cout << "Successfully loaded target " << cmd[1] << "\n";
@@ -265,7 +266,7 @@ void handler(std::vector<std::string> cmd) {
 				std::cout << noSelectionError;
 			else
 				site_str += cmd[1] + "://" + target.getIP() + ":" + cmd[2];
-			system(site_str.c_str());
+				system(site_str.c_str());
 			break;
 		case 14:
 			if (cmd.size() != 1) {std::cout << incorrectUsage(cmd[0]);return;}
@@ -310,6 +311,7 @@ int main(int argc, char *argv[]) {
 		printUsage();
 		return 1;
 	}
+	system("clear");
 	filesystem::current_path(selfpath);
 	Workspace Ws = init_workspace(argv[1]);
 	char* line;
