@@ -257,8 +257,10 @@ void handler(std::vector<std::string> cmd) {
 			break;
 		default:
 			for (int i = 0; i < no_of_dangerous; i++){
-				if (cmd[0] == dangerous[i]){
-					std::cout << "sapphire: this is 'dangerous' command - try prefixing with '!'\n";
+				if (cmd[0] == dangerous[i] ){
+					if (cmd[0] == "cd") {std::cout << "cd should only be used by spawning a shell. Try '!cd' (unsafe) or preferably, 'bash'/'sh'/'zsh', etc\n"; return;}
+					else
+						std::cout << "sapphire: this is 'dangerous' command - try prefixing with '!'\n";
 					return;
 				}
 			}
@@ -267,7 +269,6 @@ void handler(std::vector<std::string> cmd) {
 				return;
 			}
 			for (std::string token : cmd){
-				if (token == "cd") {std::cout << "cd should only be used by spawning a shell. Try '!cd` (unsafe) or preferably, 'bash'/'sh'/'zsh', etc\n"; return;}
 				system_cmd += token + ' ';	
 			}
 			system(system_cmd.c_str());
