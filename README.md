@@ -1,7 +1,7 @@
 # Sapphire
 ## A CTF workspace organisation tool  
 
-View the full demo for Sapphire [here](https://fouriersec.github.io/2022/07/15/sapphire-project).
+View the full demo for Sapphire [here](https://gambit-99.github.io/2022/07/15/sapphire-project).
 
 ### Why?
 I first made a (very) simple prototype of Sapphire in python to allow me to automatically set up my work area each time I played some [HackTheBox](https://hackthebox.com).  
